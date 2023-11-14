@@ -18,11 +18,11 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           known_hosts: ${{ secrets.KNOWN_HOSTS }}
 
-      - name: test
+      - name: connect
         run: ssh ${{ secrets.SSH_USER }}@${{ steps.branch-name.outputs.current_branch }}
 
-      - name: mkdir /test
-
+      - name: test
+        run: mkdir /test
       # - name: configurate swapfile
       #   run: ssh ${{ secrets.SSH_USER }}@${{ steps.branch-name.outputs.current_branch }} "fallocate -l 2G /swapfile && chmod 600 /swapfile && mkswap /swapfile && swapon /swapfile"
       # - name: cp
