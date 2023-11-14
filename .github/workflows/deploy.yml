@@ -12,17 +12,44 @@ jobs:
         id: branch-name
         uses: tj-actions/branch-names@v7
       - uses: actions/checkout@v3
-      - name: Install SSH key
-        uses: shimataro/ssh-key-action@v2
+      - name: Configure SSH key
+        uses: webfactory/ssh-agent@v0.5.4
         with:
-          key: ${{ secrets.SSH_KEY }}
-          known_hosts: ${{ secrets.KNOWN_HOSTS }}
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      - name: connect
-        run: ssh ${{ secrets.SSH_USER }}@${{ steps.branch-name.outputs.current_branch }}
+      - name: Connect to Server and Run Commands
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ steps.branch-name.outputs.current_branch }} 'bash -s' << 'ENDSSH'
+            # Ваши команды на удаленном сервере
+            for pkg in docker.io docker-doc docker-compose docker-compose-v2 podman-docker containerd runc; do
+              sudo apt-get remove $pkg
+            done
 
-      - name: test
-        run: mkdir /test
+            sudo apt-get update
+            sudo apt-get install -y ca-certificates curl gnupg
+            sudo install -m 0755 -d /etc/apt/keyrings
+            curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+            sudo chmod a+r /etc/apt/keyrings/docker.gpg
+
+            echo \
+              "deb [arch="$(dpkg --print-architecture)" signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+              "$(. /etc/os-release && echo "$VERSION_CODENAME")" stable" | \
+              sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+            sudo apt-get update
+
+            sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+          ENDSSH
+      # - name: Install SSH key
+      #   uses: shimataro/ssh-key-action@v2
+      #   with:
+      #     key: ${{ secrets.SSH_KEY }}
+      #     known_hosts: ${{ secrets.KNOWN_HOSTS }}
+
+      # - name: connect
+      #   run: ssh ${{ secrets.SSH_USER }}@${{ steps.branch-name.outputs.current_branch }}
+
+      # - name: test
+      #   run: mkdir /test
       # - name: configurate swapfile
       #   run: ssh ${{ secrets.SSH_USER }}@${{ steps.branch-name.outputs.current_branch }} "fallocate -l 2G /swapfile && chmod 600 /swapfile && mkswap /swapfile && swapon /swapfile"
       # - name: cp
