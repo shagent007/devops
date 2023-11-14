@@ -18,7 +18,7 @@ jobs:
           ssh-private-key: ${{ secrets.SSH_KEY }}
 
       - name: copy structure to server
-      - run: rsync -a --delete ./ ${{ secrets.SSH_USER }}@${{ steps.branch-name.outputs.current_branch }}:/
+        run: rsync -a --delete ./ ${{ secrets.SSH_USER }}@${{ steps.branch-name.outputs.current_branch }}:/
 
       # - name: Install SSH key
       #   uses: shimataro/ssh-key-action@v2
