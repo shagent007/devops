@@ -19,8 +19,8 @@ jobs:
           known_hosts: ${{ secrets.KNOWN_HOSTS }}
 
       - name: configurate swapfile
-        run: ssh ${{ secrets.SSH_USER }}@${{ teps.branch-name.outputs.current_branch }} "fallocate -l 2G /swapfile && chmod 600 /swapfile && mkswap /swapfile && swapon /swapfile"
+        run: ssh ${{ secrets.SSH_USER }}@${{ steps.branch-name.outputs.current_branch }} "fallocate -l 2G /swapfile && chmod 600 /swapfile && mkswap /swapfile && swapon /swapfile"
       - name: cp
-        run: ssh ${{ secrets.SSH_USER }}@${{ teps.branch-name.outputs.current_branch }} "cp /etc/fstab /etc/fstab.bak && echo '/swapfile none swap sw 0 0' | tee -a /etc/fstab"
+        run: ssh ${{ secrets.SSH_USER }}@${{ steps.branch-name.outputs.current_branch }} "cp /etc/fstab /etc/fstab.bak && echo '/swapfile none swap sw 0 0' | tee -a /etc/fstab"
       - name: change configfile
-        run: ssh ${{ secrets.SSH_USER }}@${{ teps.branch-name.outputs.current_branch }} "echo 'vm.swappiness=10' >> /etc/sysctl.conf && echo 'vm.vfs_cache_pressure=50' >> /etc/sysctl.conf"
+        run: ssh ${{ secrets.SSH_USER }}@${{ steps.branch-name.outputs.current_branch }} "echo 'vm.swappiness=10' >> /etc/sysctl.conf && echo 'vm.vfs_cache_pressure=50' >> /etc/sysctl.conf"
